@@ -15,14 +15,14 @@ import (
 
 const (
 	// Example: https://www.banki.ru/products/currency/map/moskva/.
-	baseURL = "https://www.banki.ru/products/currency/map/%s/"
-
-	seleniumHubURL = "http://selenium-hub:4444/wd/hub"
+	baseURL = "https://www.banki.ru/products/currency/map/%s/?currencyId=%s"
 )
 
 var (
 	// Debug mode. Default: false.
 	Debug bool
+
+	seleniumHubURL = "http://selenium-hub:4444/wd/hub"
 )
 
 // Client is a client for banki.ru.
@@ -36,6 +36,10 @@ func NewClient() (*Client, error) {
 	c := &Client{}
 	var err error
 
+	if Debug {
+		seleniumHubURL = "http://localhost:4444/wd/hub"
+	}
+
 	c.webDriver, err = selenium.NewRemote(selenium.Capabilities{"browserName": "chrome"}, seleniumHubURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start selenium: %s", err)
@@ -45,36 +49,34 @@ func NewClient() (*Client, error) {
 }
 
 // Branches returns branches info.
-// Currency is USD by default, city is Moscow by default.
-func (c *Client) Branches(crnc Currency, ct Region) (*Branches, error) {
-	branches := &Branches{}
+// By default, it returns branches in Moscow and currency USD.
+func (c *Client) Branches(city, currency string) (*Branches, error) {
+	r := &Branches{Currency: currency, City: city}
 
-	if len(crnc) > 0 {
-		branches.Currency = crnc
+	if len(currency) == 0 {
+		r.Currency = "USD"
 	}
 
-	if len(ct) > 0 {
-		branches.City = ct
+	if len(city) == 0 {
+		r.City = string(Moscow)
 	}
 
 	c.buildURL = func() string {
-		return fmt.Sprintf(baseURL, branches.City)
+		return fmt.Sprintf(baseURL, r.City, CurrencyCodeMap[r.Currency])
 	}
 
 	if Debug {
 		log.Debug().Msgf("Fetching the currency rate from %s", c.buildURL())
 	}
 
-	r := &Branches{Currency: crnc, City: ct}
-	b, err := c.parseBranches()
+	var err error
+	r.Items, err = c.parseBranches()
 	if err != nil {
 		return r, err
 	}
 
-	r.Items = b
-
 	if Debug {
-		log.Debug().Msgf("Found %d branches", len(b))
+		log.Debug().Msgf("Found %d branches", len(r.Items))
 	}
 
 	return r, err
@@ -164,7 +166,6 @@ func (c *Client) parseBranches() ([]Branch, error) {
 
 // parseBranch parses branch info from the HTML element.
 func parseBranch(e selenium.WebElement) (Branch, error) {
-
 	eUpdatedDate, err := e.FindElement(selenium.ByCSSSelector, ".cURBaH")
 	if err != nil {
 		return Branch{}, fmt.Errorf("failed find eUpdatedDate: %v", err)
