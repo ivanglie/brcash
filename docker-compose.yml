@@ -29,8 +29,7 @@ services:
     image: ivanglie/brcash:latest
     container_name: brcash
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:8080"
     build:
       context: .
       dockerfile: Dockerfile
