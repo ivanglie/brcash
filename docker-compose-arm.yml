@@ -1,0 +1,42 @@
+# To execute this docker-compose yml file use `docker-compose -f docker-compose-arm.yml up`
+# Add the `-d` flag at the end for detached execution
+# To stop the execution, hit Ctrl+C, and then `docker-compose -f docker-compose-arm.yml down`
+version: '3'
+services:
+  chrome:
+    image: seleniarm/node-chromium:latest
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    ports:
+      - "6900:5900"
+    networks:
+      - localhost
+
+  selenium-hub:
+    image: seleniarm/hub:latest
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    networks:
+      - localhost
+
+  brcash:
+    image: ivanglie/brcash:latest
+    container_name: brcash
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - localhost
+
+networks:
+  localhost:

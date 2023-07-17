@@ -1,0 +1,8 @@
+### novosibirsk
+GET http://localhost:8080/search?region=novosibirsk
+
+### moskva
+GET http://localhost:8080/search?region=moskva
+
+### habarovsk
+GET http://localhost:8080/search?region=habarovsk
