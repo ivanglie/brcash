@@ -32,6 +32,7 @@ func main() {
 	}
 
 	setupLog(opts.Dbg)
+	api.Debug = opts.Dbg
 
 	h := http.NewServeMux()
 	h.HandleFunc("/", search)
@@ -45,19 +46,12 @@ func main() {
 func search(w http.ResponseWriter, r *http.Request) {
 	log.Info().Msg("Search...")
 
-	region := r.URL.Query().Get("region")
-	if len(region) == 0 {
-		region = string(api.Moscow)
-	}
-
-	log.Info().Msgf("region is %s", region)
-
 	client, err := api.NewClient()
 	if err != nil {
 		log.Error().Msg(err.Error())
 	}
 
-	branches, err := client.Branches(api.USD, api.Region(region))
+	branches, err := client.Branches(r.URL.Query().Get("region"), r.URL.Query().Get("currency"))
 	if err != nil {
 		log.Error().Msg(err.Error())
 	}

@@ -1,8 +1,17 @@
-### novosibirsk
+### novosibirsk, (USD)
 GET http://localhost:8080/search?region=novosibirsk
 
-### moskva
-GET http://localhost:8080/search?region=moskva
+### novosibirsk, CNY
+GET http://localhost:8080/search?region=novosibirsk&currency=CNY
 
-### habarovsk
-GET http://localhost:8080/search?region=habarovsk
+### (moskva, USD)
+GET http://localhost:8080/search/
+
+### moskva, (USD)
+GET http://localhost:8080/search/?region=moskva
+
+### (moskva), BYN
+GET http://localhost:8080/search/?currency=BYN
+
+### moskva, EUR
+GET http://localhost:8080/search/?region=moskva&currency=EUR
