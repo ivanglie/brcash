@@ -1,6 +1,12 @@
 ### novosibirsk, (USD)
 GET http://localhost:8080/search?region=novosibirsk
 
+### novosibirsk, (USD)
+GET http://localhost:8080/search?region=novosibirsk&sort=by-buy
+
+### novosibirsk, (USD)
+GET http://localhost:8080/search?region=novosibirsk&sort=by-sell
+
 ### novosibirsk, CNY
 GET http://localhost:8080/search?region=novosibirsk&currency=CNY
 

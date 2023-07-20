@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sort"
 
 	"github.com/ivanglie/brcash/internal/api"
 	"github.com/jessevdk/go-flags"
@@ -54,6 +55,25 @@ func search(w http.ResponseWriter, r *http.Request) {
 	branches, err := client.Branches(r.URL.Query().Get("region"), r.URL.Query().Get("currency"))
 	if err != nil {
 		log.Error().Msg(err.Error())
+	}
+
+	if r.URL.Query().Get("sort") == "by-sell" {
+		b := branches.Items
+		sort.Sort(api.BySellSorter(b))
+		branches.Items = b
+	}
+
+	switch r.URL.Query().Get("sort") {
+	case "by-sell":
+		b := branches.Items
+		sort.Sort(api.BySellSorter(b))
+		branches.Items = b
+	case "by-buy":
+		b := branches.Items
+		sort.Sort(sort.Reverse(api.ByBuySorter(b)))
+		branches.Items = b
+	default:
+		//
 	}
 
 	w.Header().Set("Content-Type", "application/json")
