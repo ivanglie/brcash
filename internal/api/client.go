@@ -185,15 +185,17 @@ func parseBranch(e selenium.WebElement) (Branch, error) {
 		sUpdatedDate = strings.Join(u[len(u)-2:], " ")
 	}
 
+	updatedDate, err := time.Parse("02.01.2006 15:04", sUpdatedDate)
+	if err != nil {
+		return Branch{}, fmt.Errorf("failed to parse sUpdatedDate: %v", err)
+	}
+
 	loc, err := time.LoadLocation("Europe/Moscow")
 	if err != nil {
 		return Branch{}, fmt.Errorf("failed to load location: %v", err)
 	}
 
-	updatedDate, err := time.ParseInLocation("02.01.2006 15:04", sUpdatedDate, loc)
-	if err != nil {
-		return Branch{}, fmt.Errorf("failed to parse sUpdatedDate: %v", err)
-	}
+	updatedDate = updatedDate.In(loc)
 
 	if time.Now().In(loc).Sub(updatedDate) > 24*time.Hour {
 		return Branch{}, fmt.Errorf("updatedDate is out of date for 24 hours: %v", updatedDate)

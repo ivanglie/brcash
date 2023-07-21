@@ -57,23 +57,22 @@ func search(w http.ResponseWriter, r *http.Request) {
 		log.Error().Msg(err.Error())
 	}
 
-	if r.URL.Query().Get("sort") == "by-sell" {
-		b := branches.Items
-		sort.Sort(api.BySellSorter(b))
-		branches.Items = b
+	s := r.URL.Query().Get("sort")
+	if len(s) == 0 {
+		s = "by-sell"
 	}
 
-	switch r.URL.Query().Get("sort") {
-	case "by-sell":
-		b := branches.Items
-		sort.Sort(api.BySellSorter(b))
-		branches.Items = b
+	b := branches.Items
+
+	switch s {
 	case "by-buy":
-		b := branches.Items
+		log.Debug().Msg("Sort by buy")
 		sort.Sort(sort.Reverse(api.ByBuySorter(b)))
 		branches.Items = b
-	default:
-		//
+	case "by-sell":
+		log.Debug().Msg("Sort by sell")
+		sort.Sort(api.BySellSorter(b))
+		branches.Items = b
 	}
 
 	w.Header().Set("Content-Type", "application/json")
